@@ -628,7 +628,7 @@
       <div class="eyebrow"><span class="dot"></span>Slide 4 · 과거</div>
       <div class="grid-2">
         <article class="card">
-          <h3>공간과 시간의 트레이드오프</h3>
+          <h3>[과거] 공간과 시간의 트레이드오프</h3>
           <ul>
             <li>키워드: Eager Loading, Look-Up Table, TensorFlow 1.x</li>
             <li>연산(시간)은 비싸고, 메모리(공간)는 싸다.</li>
@@ -642,14 +642,29 @@ session = tf.compat.v1.Session(config=config)
 
 # Define-and-Run 기반 정적 그래프
 # 세션 시작 시 VRAM을 크게 선점할 수 있음</code></pre>
+          <p style="margin-top:10px; font-size: 14px; color: #cfe0ee;">핵심 포인트: 데이터 크기가 통제 가능했던 시절, 속도를 위해 메모리에 필요한 것을 미리 올려두던 패러다임.</p>
         </article>
         <article class="card">
-          <h3>핵심 포인트</h3>
-          <p>데이터 크기가 통제 가능했던 시절에는 속도를 위해 메모리에 필요한 것을 미리 올려두는 방식이 표준이었다. 과거 프레임워크는 실행 안정성과 처리량을 위해 정적 메모리 선점 전략을 적극 사용했다.</p>
+          <h3>[전환기] 빅데이터 시대와 PyTorch의 승리</h3>
+          <ul>
+            <li>키워드: Lazy Evaluation(지연 평가), PyTorch 동적 그래프</li>
+            <li>데이터가 메모리를 초과하는 순간, 철학이 바뀐다.</li>
+            <li>필요할 때 필요한 만큼만 할당하는 Dynamic Memory Allocation 대두</li>
+          </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background: rgba(6, 14, 24, 0.75);">
+            <div style="font-size:13px; color:#d6e5f2; margin-bottom:6px; font-weight:700;">데이터 스트리밍 개념도 (Python / Go / Rust)</div>
+            <div style="font-size:12px; color:#c3d6e6; line-height:1.5;">
+              Disk / Network Source
+              <br/>-> Generator / Iterator / Channel Stream
+              <br/>-> Batch Buffer (on demand)
+              <br/>-> Compute Step
+              <br/>-> Release / Next Chunk
+            </div>
+          </div>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 과거의 정답은 메모리 선점으로 연산 시간을 줄이는 것이었다</span>
+        <span>핵심: Preload 중심에서 On-demand 중심으로 메모리 철학이 전환</span>
         <span>04 / 10</span>
       </div>
     </section>
