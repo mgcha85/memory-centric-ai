@@ -630,37 +630,73 @@
         <article class="card">
           <h3>[과거] 공간과 시간의 트레이드오프</h3>
           <ul>
-            <li>키워드: Eager Loading, Look-Up Table, TensorFlow 1.x</li>
+            <li>키워드: Eager Loading, Look-Up Table</li>
             <li>연산(시간)은 비싸고, 메모리(공간)는 싸다.</li>
-            <li>정적 그래프로 GPU 메모리를 시작부터 크게 점유</li>
+            <li>핵심 전략: 필요한 데이터를 미리 올리고, 계산은 나중에 빠르게 수행</li>
           </ul>
-          <pre style="margin-top:10px; padding:10px; border-radius:10px; background: rgba(4, 10, 18, 0.85); color:#d9e8f6; border:1px solid var(--line); overflow:auto; font-size:12px; line-height:1.4;"><code>import tensorflow as tf
-
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = False
-session = tf.compat.v1.Session(config=config)
-
-# Define-and-Run 기반 정적 그래프
-# 세션 시작 시 VRAM을 크게 선점할 수 있음</code></pre>
-          <p style="margin-top:10px; font-size: 14px; color: #cfe0ee;">핵심 포인트: 데이터 크기가 통제 가능했던 시절, 속도를 위해 메모리에 필요한 것을 미리 올려두던 패러다임.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+            <div style="border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,16,28,0.78);">
+              <div style="font-size:13px; color:#dce9f5; font-weight:700; margin-bottom:6px;">이미지 A · Eager Loading</div>
+              <div style="display:grid; grid-template-columns:repeat(8,1fr); gap:3px;">
+                <span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span>
+                <span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span><span style="height:10px; background:#ffb347; border-radius:2px;"></span>
+              </div>
+              <div style="font-size:11px; color:#c3d7e8; margin-top:6px;">메모리를 먼저 채워 실행 중 대기 시간을 줄임</div>
+            </div>
+            <div style="border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,16,28,0.78);">
+              <div style="font-size:13px; color:#dce9f5; font-weight:700; margin-bottom:6px;">이미지 B · Look-Up Table</div>
+              <div style="display:grid; gap:4px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#bcd0e2;"><span>f(x1)</span><span>0.132</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#bcd0e2;"><span>f(x2)</span><span>0.761</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#bcd0e2;"><span>f(x3)</span><span>0.418</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:11px; color:#bcd0e2;"><span>f(x4)</span><span>0.997</span></div>
+              </div>
+              <div style="font-size:11px; color:#c3d7e8; margin-top:6px;">복잡한 계산 대신 미리 계산된 값을 인덱싱</div>
+            </div>
+          </div>
+          <p style="margin-top:10px; font-size: 14px; color: #cfe0ee;">핵심 포인트: 데이터 크기가 통제 가능했던 시절에는 메모리를 더 써서 런타임 계산을 줄이는 방식이 가장 빨랐다.</p>
         </article>
         <article class="card">
           <h3>[전환기] 빅데이터 시대와 PyTorch의 승리</h3>
-          <ul>
-            <li>키워드: Lazy Evaluation(지연 평가), PyTorch 동적 그래프</li>
-            <li>데이터가 메모리를 초과하는 순간, 철학이 바뀐다.</li>
-            <li>필요할 때 필요한 만큼만 할당하는 Dynamic Memory Allocation 대두</li>
-          </ul>
+          <p style="font-size:14px; color:#d7e6f3; margin-bottom:8px;">데이터가 메모리를 초과하는 순간, 프레임워크는 "얼마나 아끼며 쓰는가"가 성능 핵심이 됐다.</p>
+          <div style="overflow:auto; border:1px solid var(--line); border-radius:12px;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d9e8f5;">
+              <thead style="background:rgba(79,209,197,0.15);">
+                <tr>
+                  <th style="padding:8px; text-align:left; border-bottom:1px solid var(--line);">프레임워크</th>
+                  <th style="padding:8px; text-align:left; border-bottom:1px solid var(--line);">메모리 관점</th>
+                  <th style="padding:8px; text-align:left; border-bottom:1px solid var(--line);">개발자 제어성</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">PyTorch</td>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">동적 그래프 + 요청 시 할당/해제 중심</td>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">높음</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">TensorFlow</td>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">실행 모드/옵션에 따라 선점 성향 또는 growth 설정</td>
+                  <td style="padding:8px; border-bottom:1px solid var(--line);">중간</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;">Keras</td>
+                  <td style="padding:8px;">백엔드(TF 등) 메모리 전략을 크게 따름</td>
+                  <td style="padding:8px;">중간-낮음</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background: rgba(6, 14, 24, 0.75);">
-            <div style="font-size:13px; color:#d6e5f2; margin-bottom:6px; font-weight:700;">데이터 스트리밍 개념도 (Python / Go / Rust)</div>
+            <div style="font-size:13px; color:#d6e5f2; margin-bottom:6px; font-weight:700;">메모리를 아끼면 왜 속도가 빨라질까?</div>
             <div style="font-size:12px; color:#c3d6e6; line-height:1.5;">
-              Disk / Network Source
-              <br/>-> Generator / Iterator / Channel Stream
-              <br/>-> Batch Buffer (on demand)
-              <br/>-> Compute Step
-              <br/>-> Release / Next Chunk
+              메모리 낭비 감소
+              <br/>-> 메모리 이동량/페이지 교체 감소
+              <br/>-> 캐시 적중률 상승 + OOM 재시도 감소
+              <br/>-> 실제 처리량(tokens/sec, samples/sec) 상승
             </div>
           </div>
+          <p style="font-size:11px; color:#9fb4c7; margin-top:8px;">참고 문서: https://www.tensorflow.org/guide/gpu, https://docs.pytorch.org/docs/stable/notes/cuda.html, https://keras.io/getting_started/faq/</p>
         </article>
       </div>
       <div class="footer">
@@ -738,6 +774,22 @@ session = tf.compat.v1.Session(config=config)
             <span style="padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(255,179,71,0.2);">증가한 KV 블록</span>
             <span style="padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(255,107,107,0.2);">고밀도 + OOM 위험</span>
             <span style="padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(236,243,248,0.14);">파편화 구멍</span>
+          </div>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.6);">
+            <div style="font-size:13px; color:#dce9f5; font-weight:700; margin-bottom:6px;">왜 파편화가 문제인가? Step2 vs Step3</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d5e5f3;">
+              <tbody>
+                <tr>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); width:30%;">Step 2</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">여유 블록이 아직 있어 요청을 수용 가능하지만, 연속 공간 요구가 늘면 배치 효율이 떨어지기 시작</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px; width:30%;">Step 3</td>
+                  <td style="padding:6px;">총 여유량이 남아도 큰 연속 블록을 못 만들어 할당 실패 발생. 즉, "남은 메모리"와 "쓸 수 있는 메모리"가 분리됨</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:11px; color:#a9bfd2; margin-top:6px;">결론: 파편화는 메모리를 고갈시키기 전에 성능을 먼저 무너뜨리고, 임계점에서 OOM을 가속한다.</p>
           </div>
         </article>
       </div>
