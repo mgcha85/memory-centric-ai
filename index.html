@@ -803,20 +803,66 @@
       <div class="eyebrow"><span class="dot"></span>Slide 6 · 돌파구 1</div>
       <div class="grid-2">
         <article class="card">
-          <h3>OS의 지혜: vLLM & PagedAttention</h3>
+          <h3>[왼쪽] Transformer 한계와 vLLM</h3>
           <ul>
-            <li>키워드: Paging, Block-based KV 관리</li>
-            <li>연속 메모리 강제 대신 블록 매핑으로 파편화 완화</li>
-            <li>테트리스처럼 빈 공간을 활용해 처리량 개선</li>
+            <li>KV Cache 딜레마: 문맥이 길어질수록 메모리 부담이 급격히 커짐</li>
+            <li>복잡도: O(N^2) 성향으로 긴 컨텍스트에서 비용이 빠르게 증가</li>
+            <li>반창고 전략: PagedAttention(vLLM)으로 조각난 VRAM에 블록 단위 매핑</li>
+            <li>효과: 파편화와 메모리 낭비를 크게 줄여 처리량을 실무 수준으로 회복</li>
           </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">vLLM(PagedAttention) 시각화 · "테트리스"</div>
+            <div style="display:grid; grid-template-columns:repeat(12,1fr); gap:4px;">
+              <span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:rgba(236,243,248,0.2);"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:rgba(236,243,248,0.2);"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:rgba(236,243,248,0.2);"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span><span style="height:14px; border-radius:3px; background:#ffb347;"></span>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(12,1fr); gap:4px; margin-top:4px;">
+              <span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span><span style="height:14px; border-radius:3px; background:#4fd1c5;"></span>
+            </div>
+            <p style="font-size:11px; color:#b9d0e3; margin-top:6px;">상단: 기존 단편화 상태, 하단: 블록 재배치 후 높은 밀도</p>
+          </div>
         </article>
         <article class="card">
-          <h3>핵심 포인트</h3>
-          <p>운영체제 가상 메모리 개념을 GPU 인퍼런스에 이식했다는 점을 핵심 메시지로 전달한다. 로컬/온프레미스 LLM 서빙에서 체감 처리량이 크게 오르는 이유를 연결한다.</p>
+          <h3>[오른쪽] Post-Transformer, Mamba(SSM)</h3>
+          <ul>
+            <li>"심장 교체" 전략: 아키텍처 자체를 바꿔 KV Cache 의존성을 낮춤</li>
+            <li>복잡도: O(N) 선형 복잡도, 문맥 길이가 커져도 메모리 증가가 완만</li>
+            <li>핵심 문장: 과거를 압축하다. 고정된 state로 정보를 누적 표현</li>
+            <li>의미: 1만 토큰이든 100만 토큰이든 메모리 스케일링 안정성 확보</li>
+          </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">복잡도 비교 시각화</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d5e4f2;">
+              <thead style="background:rgba(79,209,197,0.12);">
+                <tr>
+                  <th style="padding:6px; text-align:left; border-bottom:1px solid var(--line);">문맥 길이</th>
+                  <th style="padding:6px; text-align:left; border-bottom:1px solid var(--line);">Transformer(KV)</th>
+                  <th style="padding:6px; text-align:left; border-bottom:1px solid var(--line);">Mamba(SSM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">8K</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">상대 메모리 1x</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">상대 메모리 1x</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">64K</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">상대 메모리 64x 수준 증가</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">상대 메모리 8x 수준 증가</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px;">1M</td>
+                  <td style="padding:6px;">실무상 극단적 부담 (OOM 위험)</td>
+                  <td style="padding:6px;">선형 증가 또는 사실상 일정에 가까운 거동</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:11px; color:#a9bfd2; margin-top:8px;">핵심 포인트: 태생적 한계를 소프트웨어(메모리 관리)로 완화한 vLLM과, 수학적 아키텍처 자체를 바꾼 Mamba는 서로 다른 레벨의 혁신이다.</p>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 메모리 파편화를 4% 미만 수준으로 억제</span>
+        <span>핵심: vLLM은 반창고, Mamba는 심장 교체 - 두 혁신이 공존한다</span>
         <span>06 / 09</span>
       </div>
     </section>
