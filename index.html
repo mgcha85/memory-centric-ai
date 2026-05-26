@@ -871,20 +871,50 @@
       <div class="eyebrow"><span class="dot"></span>Slide 7 · 돌파구 2</div>
       <div class="grid-2">
         <article class="card">
-          <h3>FlashAttention + Quantization</h3>
+          <h3>[돌파구 2] FlashAttention(IO-Aware)</h3>
           <ul>
-            <li>FlashAttention: HBM IO 최소화, SRAM 중심 계산</li>
-            <li>Quantization: FP16 → INT8/INT4 압축</li>
-            <li>대역폭 병목 완화 + 모델 메모리 풋프린트 축소</li>
+            <li>느린 HBM 왕복을 줄이고, 빠른 SRAM에서 연산을 최대한 끝낸다.</li>
+            <li>핵심은 FLOPS가 아니라 메모리 IO 최소화다.</li>
+            <li>긴 문맥일수록 IO-aware 설계의 효과가 크게 나타난다.</li>
           </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">FlashAttention 원리 다이어그램</div>
+            <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center;">
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">HBM (느림)
+                <br/>Q,K,V 로드</div>
+              <div style="font-size:18px; color:#ffb347;">-&gt;</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">SRAM Tile (빠름)
+                <br/>어텐션 계산/정규화</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">중간 결과 재기록 최소화</div>
+              <div style="font-size:18px; color:#ffb347;">-&gt;</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">최종 O만 HBM 저장</div>
+            </div>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">요약: HBM 왕복 횟수를 줄여 메모리 대역폭 병목을 직접 공격</p>
+          </div>
         </article>
         <article class="card">
-          <h3>핵심 포인트</h3>
-          <p>하드웨어 특성을 이해한 알고리즘 설계가 성능을 뒤집는다는 메시지를 전달한다. IO를 줄이는 기법과 데이터 크기를 줄이는 기법이 함께 갈 때 실무 최적화가 완성된다.</p>
+          <h3>Quantization 비교표 (FP16 vs INT8 vs INT4)</h3>
+          <div style="margin-top:8px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:12px; color:#c8d9e8; margin-bottom:8px;">모델 가중치 용량(상대, FP16=1.0)</div>
+            <div style="display:grid; gap:6px;">
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>FP16</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:100%;"></div><span>1.00x</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:50%;"></div><span>0.50x</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT4</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:25%;"></div><span>0.25x</span></div>
+            </div>
+
+            <div style="font-size:12px; color:#c8d9e8; margin-top:12px; margin-bottom:8px;">이론적 연산 처리 잠재력(상대, FP16=1.0)
+              <br/><span style="font-size:11px; color:#9fb4c7;">(Ampere A100 Tensor Core 피크 수치 기반 재정규화)</span></div>
+            <div style="display:grid; gap:6px;">
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>FP16</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:40%;"></div><span>1.0x</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:80%;"></div><span>2.0x</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT4</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:100%;"></div><span>4.0x</span></div>
+            </div>
+          </div>
+          <p style="font-size:11px; color:#a9bfd2; margin-top:8px;">온라인 참고: <a href="https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf" target="_blank" rel="noopener" style="color:#9fd7ff;">NVIDIA Ampere Architecture Whitepaper</a> (A100 Tensor Core peak), 비트폭별 파라미터 저장 크기 규칙(FP16 16bit, INT8 8bit, INT4 4bit)</p>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: IO-aware 알고리즘과 모델 압축의 결합</span>
+        <span>핵심: IO 횟수를 줄이고, 데이터 몸집까지 줄여 VRAM 대역폭 한계를 넘는다</span>
         <span>07 / 09</span>
       </div>
     </section>
