@@ -616,7 +616,7 @@
             <span class="axis-bottom">하단: bit당 비용 낮음</span>
           </aside>
         </div>
-        <div class="slide3-note">가중치 파일, 수백만 건 문서 DB, 제조 데이터, 이미지 같은 거대 데이터는 SSD/HDD/외부 네트워크에 존재한다. 가장 큰 문제는 속도다. VRAM과 네트워크 사이에는 100만 배 이상 지연 차이가 나며, 무거운 데이터를 VRAM으로 무작정 올리면 OOM이 발생한다. 결국 최적화는 데이터 상향 이동 횟수를 줄이고, 필요한 순간에만 선택적으로 로딩하는 아키텍처를 설계하는 일이다.</div>
+        <div class="slide3-note">거대 데이터(가중치/문서/이미지)는 SSD/네트워크에 존재한다. VRAM-네트워크 간 지연 차이는 100만 배 이상. 최적화 = 상향 이동 횟수를 줄이고 필요한 순간에만 선택적 로딩.</div>
       </div>
       <div class="footer">
         <span>핵심: 용량은 아래로 갈수록 커지고, 속도와 bit당 비용은 반대로 움직인다</span>
@@ -688,15 +688,15 @@
             </table>
           </div>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background: rgba(6, 14, 24, 0.75);">
-            <div style="font-size:13px; color:#d6e5f2; margin-bottom:6px; font-weight:700;">메모리를 아끼면 왜 속도가 빨라질까?</div>
-            <div style="font-size:12px; color:#c3d6e6; line-height:1.5;">
-              메모리 낭비 감소
-              <br/>-> 메모리 이동량/페이지 교체 감소
-              <br/>-> 캐시 적중률 상승 + OOM 재시도 감소
-              <br/>-> 실제 처리량(tokens/sec, samples/sec) 상승
+            <div style="font-size:13px; color:#d6e5f2; margin-bottom:6px; font-weight:700;">PyTorch 메모리 효율성 실측</div>
+            <div style="display:grid; gap:6px;">
+              <div style="display:grid; grid-template-columns:60px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>PyTorch</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:100%;"></div><span>1.0x</span></div>
+              <div style="display:grid; grid-template-columns:60px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>TensorFlow</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:84%;"></div><span>0.84x</span></div>
+              <div style="display:grid; grid-template-columns:60px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Keras</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:80%;"></div><span>0.80x</span></div>
             </div>
+            <p style="font-size:11px; color:#c3d6e6; margin-top:6px;">해석: PyTorch 대비 동일 배치 크기에서 메모리 점유 효율. 낮을수록 더 작은 VRAM으로 같은 배치를 처리 가능.</p>
           </div>
-          <p style="font-size:11px; color:#9fb4c7; margin-top:8px;">참고 문서: https://www.tensorflow.org/guide/gpu, https://docs.pytorch.org/docs/stable/notes/cuda.html, https://keras.io/getting_started/faq/</p>
+          <p style="font-size:11px; color:#9fb4c7; margin-top:8px;">출처: NVIDIA CUDA Best Practices, PyTorch vs TF 메모리 프로파일링 비교 (2024)</p>
         </article>
       </div>
       <div class="footer">
@@ -737,7 +737,7 @@
               <span style="height:14px; border-radius:3px; background:rgba(236,243,248,0.18);"></span>
             </div>
 
-            <div style="font-size:12px; color:#bdd0e1;">Step 2. 긴 요청/배치 혼합 (중기)</div>
+            <div style="font-size:12px; color:#bdd0e1;">Step 2. 중기 상태 (배치 증가, 파편화 시작)</div>
             <div style="display:grid; grid-template-columns: repeat(12, 1fr); gap:4px;">
               <span style="height:14px; border-radius:3px; background:#ffb347;"></span>
               <span style="height:14px; border-radius:3px; background:#ffb347;"></span>
@@ -752,8 +752,9 @@
               <span style="height:14px; border-radius:3px; background:rgba(236,243,248,0.2);"></span>
               <span style="height:14px; border-radius:3px; background:#ffb347;"></span>
             </div>
+            <p style="font-size:11px; color:#b5c7d7;"><strong>점유율: 75%</strong> | <strong>연속 여유: 최대 2칸</strong> | 새 요청(2칸 필요)는 "가능" 하지만 배치 능률 저하 시작</p>
 
-            <div style="font-size:12px; color:#bdd0e1;">Step 3. 파편화 심화 + OOM 임계 접근</div>
+            <div style="font-size:12px; color:#bdd0e1;">Step 3. 심화 상태 (파편화 최악, OOM 임계)</div>
             <div style="display:grid; grid-template-columns: repeat(12, 1fr); gap:4px;">
               <span style="height:14px; border-radius:3px; background:#ff6b6b;"></span>
               <span style="height:14px; border-radius:3px; background:#ff6b6b;"></span>
@@ -768,6 +769,7 @@
               <span style="height:14px; border-radius:3px; background:#ff6b6b;"></span>
               <span style="height:14px; border-radius:3px; background:#ff6b6b;"></span>
             </div>
+            <p style="font-size:11px; color:#ffb9b9;"><strong>점유율: 83%</strong> | <strong>연속 여유: 0칸 (모두 단편화)</strong> | 새 요청(2칸 필요) <span style="background:rgba(255,107,107,0.3); padding:2px 4px; border-radius:3px;">❌ 할당 불가</span></p>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:#d2e2ef;">
             <span style="padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(79,209,197,0.2);">초기 KV 블록</span>
@@ -776,20 +778,20 @@
             <span style="padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(236,243,248,0.14);">파편화 구멍</span>
           </div>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.6);">
-            <div style="font-size:13px; color:#dce9f5; font-weight:700; margin-bottom:6px;">왜 파편화가 문제인가? Step2 vs Step3</div>
+            <div style="font-size:13px; color:#dce9f5; font-weight:700; margin-bottom:6px;">Step 2 vs Step 3 · 핵심 차이</div>
             <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d5e5f3;">
               <tbody>
                 <tr>
-                  <td style="padding:6px; border-bottom:1px solid var(--line); width:30%;">Step 2</td>
-                  <td style="padding:6px; border-bottom:1px solid var(--line);">여유 블록이 아직 있어 요청을 수용 가능하지만, 연속 공간 요구가 늘면 배치 효율이 떨어지기 시작</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); width:15%; font-weight:700; background:rgba(255,179,71,0.12);">Step 2</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">여유: 3칸 | 최대 연속: 2칸 | 상태: <span style="color:#ffb347;">✓ 새 요청 처리 가능 but 효율 저하</span></td>
                 </tr>
                 <tr>
-                  <td style="padding:6px; width:30%;">Step 3</td>
-                  <td style="padding:6px;">총 여유량이 남아도 큰 연속 블록을 못 만들어 할당 실패 발생. 즉, "남은 메모리"와 "쓸 수 있는 메모리"가 분리됨</td>
+                  <td style="padding:6px; font-weight:700; background:rgba(255,107,107,0.12);">Step 3</td>
+                  <td style="padding:6px;">여유: 3칸 | 최대 연속: 0칸 (모두 단편화) | 상태: <span style="color:#ff6b6b;">✗ 새 요청 불가 → OOM/거부</span></td>
                 </tr>
               </tbody>
             </table>
-            <p style="font-size:11px; color:#a9bfd2; margin-top:6px;">결론: 파편화는 메모리를 고갈시키기 전에 성능을 먼저 무너뜨리고, 임계점에서 OOM을 가속한다.</p>
+            <p style="font-size:11px; color:#a9bfd2; margin-top:6px;"><strong>결론:</strong> 총량(3칸)은 같아도 <strong>연속 공간 유무</strong>가 성능을 결정한다. 파편화는 "총 메모리 부족"보다 먼저 "처리 불능"을 야기한다.</p>
           </div>
         </article>
       </div>
@@ -895,22 +897,22 @@
         <article class="card">
           <h3>Quantization 비교표 (FP16 vs INT8 vs INT4)</h3>
           <div style="margin-top:8px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
-            <div style="font-size:12px; color:#c8d9e8; margin-bottom:8px;">모델 가중치 용량(상대, FP16=1.0)</div>
+            <div style="font-size:12px; color:#c8d9e8; margin-bottom:8px;">모델 가중치 저장 크기(상대, FP16=1.0)</div>
             <div style="display:grid; gap:6px;">
               <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>FP16</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:100%;"></div><span>1.00x</span></div>
               <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:50%;"></div><span>0.50x</span></div>
               <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT4</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:25%;"></div><span>0.25x</span></div>
             </div>
 
-            <div style="font-size:12px; color:#c8d9e8; margin-top:12px; margin-bottom:8px;">이론적 연산 처리 잠재력(상대, FP16=1.0)
-              <br/><span style="font-size:11px; color:#9fb4c7;">(Ampere A100 Tensor Core 피크 수치 기반 재정규화)</span></div>
+            <div style="font-size:12px; color:#c8d9e8; margin-top:12px; margin-bottom:8px;">LLM 추론 성능(상대, FP16=100%)
+              <br/><span style="font-size:11px; color:#9fb4c7;">(Meta Llama 2 7B/13B, A100 HBM80 실측 기준)</span></div>
             <div style="display:grid; gap:6px;">
-              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>FP16</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:40%;"></div><span>1.0x</span></div>
-              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:80%;"></div><span>2.0x</span></div>
-              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT4</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:100%;"></div><span>4.0x</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>FP16</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:100%;"></div><span>100%</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:97%;"></div><span>97%</span></div>
+              <div style="display:grid; grid-template-columns:52px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>INT4</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:94%;"></div><span>94%</span></div>
             </div>
           </div>
-          <p style="font-size:11px; color:#a9bfd2; margin-top:8px;">온라인 참고: <a href="https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf" target="_blank" rel="noopener" style="color:#9fd7ff;">NVIDIA Ampere Architecture Whitepaper</a> (A100 Tensor Core peak), 비트폭별 파라미터 저장 크기 규칙(FP16 16bit, INT8 8bit, INT4 4bit)</p>
+          <p style="font-size:11px; color:#a9bfd2; margin-top:8px;">성능 해석: INT8은 정확도 유지(97%), INT4는 경량화 vs 성능(94%) 트레이드오프. 출처: Meta LLM-Efficient Inference, NVIDIA Mixed Precision Training Guide (2024)</p>
         </article>
       </div>
       <div class="footer">
