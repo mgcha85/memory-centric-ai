@@ -917,45 +917,146 @@
       </div>
       <div class="footer">
         <span>핵심: IO 횟수를 줄이고, 데이터 몸집까지 줄여 VRAM 대역폭 한계를 넘는다</span>
-        <span>07 / 09</span>
+        <span>07 / 10</span>
       </div>
     </section>
 
-    <section class="slide" data-title="Context On Demand">
-      <div class="eyebrow"><span class="dot"></span>Slide 8 · 차세대 메타</div>
+    <section class="slide" data-title="Practical Opt 1">
+      <div class="eyebrow"><span class="dot"></span>Slide 8 · 실무 최적화 1</div>
       <div class="grid-2">
         <article class="card">
-          <h3>"외우지 말고 찾아라"</h3>
+          <h3>[실무] Gradient Accumulation & AMP</h3>
           <ul>
-            <li>키워드: LLM-Wiki, Agent Skills, Prompt Caching</li>
-            <li>Parametric Memory 의존도 축소</li>
-            <li>필요한 지식만 검색/주입하고 캐시 재사용</li>
+            <li>키워드: Gradient Accumulation, Automatic Mixed Precision (AMP)</li>
+            <li>Batch Size 32가 OOM 나면? 8로 줄이고 4번 누적하면 됨</li>
+            <li>FP32 → FP16 AMP 전환으로 VRAM 절반 감소</li>
+            <li>공간(메모리) 부족 시 시간(루프)으로 우회</li>
           </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">배치 누적: 메모리-시간 트레이드오프</div>
+            <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center;">
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;"><span style="color:#ffb347; font-weight:700;">Batch 32</span>
+                <br/>1회 forward/backward
+                <br/>메모리 100% 사용</div>
+              <div style="font-size:18px; color:#ffb347;">vs</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;"><span style="color:#4fd1c5; font-weight:700;">Batch 8×4회</span>
+                <br/>4회 forward/backward
+                <br/>메모리 25% 사용
+                <br/>(기울기만 누적)</div>
+            </div>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">결과: 동일한 effective batch로 VRAM 4배 절감</p>
+          </div>
         </article>
         <article class="card">
-          <h3>핵심 포인트</h3>
-          <p>무거운 RAG를 넘어, 구조화된 지식을 온디맨드로 가져오는 하이브리드 아키텍처로 진화하고 있음을 소개한다. 결국 핵심은 메모리 사용을 정밀 타게팅하는 것이다.</p>
+          <h3>Pinned Memory (Page-locked Memory)</h3>
+          <ul>
+            <li>키워드: pin_memory, PCIe Direct, CPU 우회</li>
+            <li>일반 RAM → VRAM 전송에서 CPU 거침(병목)</li>
+            <li>pin_memory=True: 메모리 페이징 금지 → DMA 직접 전송</li>
+            <li>데이터 로더 한 줄 수정으로 대역폭 3~5배 상승</li>
+          </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">RAM ➔ VRAM 전송 속도 비교</div>
+            <div style="display:grid; gap:6px;">
+              <div style="display:grid; grid-template-columns:80px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>일반 메모리</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:25%;"></div><span>~2.5 GB/s</span></div>
+              <div style="display:grid; grid-template-columns:80px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Pinned 메모리</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:100%;"></div><span>~12 GB/s</span></div>
+            </div>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">PyTorch: DataLoader(pin_memory=True) 한 줄로 적용</p>
+          </div>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 지식은 외부화하고 컨텍스트만 지연 로딩</span>
-        <span>08 / 09</span>
+        <span>핵심: 공간이 부족하면 쪼개서 합치고, 통신 병목은 고속도로(PCIe)로 뚫어라</span>
+        <span>08 / 10</span>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Practical Opt 2">
+      <div class="eyebrow"><span class="dot"></span>Slide 9 · 실무 최적화 2</div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>[실무] Tensor Offloading</h3>
+          <ul>
+            <li>키워드: Offloading, NVMe SSD, Sequential I/O</li>
+            <li>당장 쓰지 않는 텐서(가중치)를 SSD로 내렸다가 필요할 때 올림</li>
+            <li>HDD ❌ → NVMe SSD (WD Black SN850X) ✓ 필수</li>
+            <li>VRAM 부족 → OOM 대신 SSD 버퍼로 우회</li>
+          </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">Offloading 흐름</div>
+            <div style="display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:6px; align-items:center;">
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">활성 텐서
+                <br/>(VRAM)</div>
+              <div style="font-size:16px; color:#ff6b6b;">↓ 내리기</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">미사용 텐서
+                <br/>(NVMe SSD)</div>
+              <div style="font-size:16px; color:#4fd1c5;">↑ 올리기</div>
+              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;">다음 스텝
+                <br/>(VRAM)</div>
+            </div>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">버퍼: 읽기 ~7GB/s, 쓰기 ~6GB/s (NVMe 기준)</p>
+          </div>
+        </article>
+        <article class="card">
+          <h3>[실무] 백엔드 최적화: Python → Rust/Go</h3>
+          <ul>
+            <li>키워드: Rust, Go, GC (Garbage Collection) 제거</li>
+            <li>전처리/라우팅 백엔드가 Python이면 GIL 병목</li>
+            <li>메모리 누수 + GC 대기 → 불규칙적 지연 증가</li>
+            <li>핵심 구간을 Rust/Go로 재작성하면 안정적 처리량 확보</li>
+          </ul>
+          <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">백엔드 메모리 특성 비교</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d5e5f3;">
+              <tbody>
+                <tr style="background:rgba(255,179,71,0.12);">
+                  <td style="padding:6px; border-bottom:1px solid var(--line); font-weight:700;">Python</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">GIL + GC, 메모리 누수 위험, 높은 지연 변동성</td>
+                </tr>
+                <tr style="background:rgba(79,209,197,0.12);">
+                  <td style="padding:6px; border-bottom:1px solid var(--line); font-weight:700;">Rust</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line);">소유권 기반, 메모리 안전, 제로 오버헤드</td>
+                </tr>
+                <tr style="background:rgba(140,233,154,0.12);">
+                  <td style="padding:6px;">Go</td>
+                  <td style="padding:6px;">경량 고루틴, 빠른 GC, 괜찮은 동시성</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+      <div class="footer">
+        <span>핵심: 파이썬의 병목을 하드웨어와 고성능 언어로 뚫다</span>
+        <span>09 / 10</span>
       </div>
     </section>
 
     <section class="slide" data-title="Conclusion">
-      <div class="eyebrow"><span class="dot"></span>Slide 9 · 결론</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 10 · 결론</div>
       <div>
-        <h2>메모리를 지배하는 자가 AI 시스템을 지배한다</h2>
-        <ul>
-          <li>요약: AI 최적화의 역사는 메모리 병목을 줄이는 역사</li>
-          <li>Demo Repo: github.com/.../ai-memory-architecture</li>
-          <li>Q&A</li>
-        </ul>
+        <h2>메모리를 이해하는 자가, 가장 가볍고 빠른 AI를 만든다</h2>
+        <div style="margin-top:20px; display:grid; gap:16px;">
+          <div style="border:1px solid var(--line); border-radius:12px; padding:14px; background:rgba(8,18,31,0.6);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:8px;">Demo 1: vLLM 오프라인 서빙</div>
+            <p style="font-size:12px; color:#c3d6e6; margin-bottom:6px;">PagedAttention + Batch 최적화를 실제 Llama 2 7B 모델로 실행하고, 메모리 플래그 튜닝에 따른 처리량 변화 벤치마크</p>
+            <p style="font-size:11px; color:#9fb4c7;"><a href="https://github.com/mgcha85/ai-memory-architecture" target="_blank" rel="noopener" style="color:#9fd7ff;">github.com/mgcha85/ai-memory-architecture</a></p>
+          </div>
+          <div style="border:1px solid var(--line); border-radius:12px; padding:14px; background:rgba(8,18,31,0.6);">
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:8px;">Demo 2: Rust vs Python 전처리</div>
+            <p style="font-size:12px; color:#c3d6e6; margin-bottom:6px;">이미지 전처리/정규화 파이프라인을 Python과 Rust로 구현, 메모리 할당/해제 횟수와 GC 지연 비교</p>
+            <p style="font-size:11px; color:#9fb4c7;">Repository: Python (PyTorch) + Rust (ndarray) 벤치마크 코드 포함</p>
+          </div>
+        </div>
+        <div style="margin-top:16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:rgba(79,209,197,0.1);">
+          <p style="font-size:12px; color:#c8dce9; line-height:1.6;">
+            <strong>핵심:</strong> AI 최적화는 모델의 가중치만 보는 것이 아닙니다. 이 모델이 어느 계층의 메모리에 올라가고, 어떤 프로세스로 서빙되며, 앞단의 백엔드 파이프라인이 데이터를 어떻게 밀어 넣어주는지 시스템 전체를 조망해야 합니다. 화면의 레포지토리에 오늘 다룬 모든 최적화 기법의 실전 데모 코드를 담았습니다.
+          </p>
+        </div>
       </div>
       <div class="footer">
-        <span>핵심: 메모리 병목을 줄이는 설계가 실무 성능을 결정한다</span>
-        <span>09 / 09</span>
+        <span>핵심: 제약을 이해할 때, 진정한 최적화가 시작된다</span>
+        <span>10 / 10</span>
       </div>
     </section>
   </main>
