@@ -925,48 +925,46 @@
       <div class="eyebrow"><span class="dot"></span>Slide 8 · 실무 최적화 1</div>
       <div class="grid-2">
         <article class="card">
-          <h3>[실무] Gradient Accumulation & AMP</h3>
+          <h3>[실무] 메모리 IO 병목 줄이기: Lazy Loading</h3>
           <ul>
-            <li>키워드: Gradient Accumulation, Automatic Mixed Precision (AMP)</li>
-            <li>Batch Size 32가 OOM 나면? 8로 줄이고 4번 누적하면 됨</li>
-            <li>FP32 → FP16 AMP 전환으로 VRAM 절반 감소</li>
-            <li>공간(메모리) 부족 시 시간(루프)으로 우회</li>
+            <li>키워드: Lazy Loading, Memory-mapped File, Prefetching</li>
+            <li>대용량 모델/데이터를 한 번에 올리지 않고 실제 필요 시점에만 로드</li>
+            <li><code style="font-size:11px; color:#4fd1c5; background:rgba(79,209,197,0.12); padding:2px 5px; border-radius:4px;">torch.load(..., mmap=True)</code>: 파일을 RAM에 복사 않고 직접 맵핑</li>
+            <li>HuggingFace: <code style="font-size:11px; color:#4fd1c5; background:rgba(79,209,197,0.12); padding:2px 5px; border-radius:4px;">load_in_8bit=True</code> / LazyTensor로 가중치 지연 로드</li>
+            <li>PyTorch DataLoader: <code style="font-size:11px; color:#4fd1c5; background:rgba(79,209,197,0.12); padding:2px 5px; border-radius:4px;">pin_memory=True</code> + <code style="font-size:11px; color:#4fd1c5; background:rgba(79,209,197,0.12); padding:2px 5px; border-radius:4px;">num_workers</code>로 CPU↔GPU 비동기 Prefetch</li>
           </ul>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
-            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">배치 누적: 메모리-시간 트레이드오프</div>
-            <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center;">
-              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;"><span style="color:#ffb347; font-weight:700;">Batch 32</span>
-                <br/>1회 forward/backward
-                <br/>메모리 100% 사용</div>
-              <div style="font-size:18px; color:#ffb347;">vs</div>
-              <div style="border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; font-size:12px; color:#d6e5f2;"><span style="color:#4fd1c5; font-weight:700;">Batch 8×4회</span>
-                <br/>4회 forward/backward
-                <br/>메모리 25% 사용
-                <br/>(기울기만 누적)</div>
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">Eager vs Lazy 로딩 메모리 사용량</div>
+            <div style="display:grid; gap:6px;">
+              <div style="display:grid; grid-template-columns:90px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Eager (전체)</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ff6b6b,#ff9e7a); width:100%;"></div><span>100%</span></div>
+              <div style="display:grid; grid-template-columns:90px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>mmap 방식</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:40%;"></div><span>~40%</span></div>
+              <div style="display:grid; grid-template-columns:90px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Lazy + INT8</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:22%;"></div><span>~22%</span></div>
             </div>
-            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">결과: 동일한 effective batch로 VRAM 4배 절감</p>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">출처: HuggingFace Accelerate 문서, PyTorch mmap 가이드</p>
           </div>
         </article>
         <article class="card">
-          <h3>Pinned Memory (Page-locked Memory)</h3>
+          <h3>[실무] DuckDB · 분석 쿼리 OOM 방지</h3>
           <ul>
-            <li>키워드: pin_memory, PCIe Direct, CPU 우회</li>
-            <li>일반 RAM → VRAM 전송에서 CPU 거침(병목)</li>
-            <li>pin_memory=True: 메모리 페이징 금지 → DMA 직접 전송</li>
-            <li>데이터 로더 한 줄 수정으로 대역폭 3~5배 상승</li>
+            <li>키워드: DuckDB, Spill to Disk, Memory Limit, Chunked Execution</li>
+            <li>Pandas: 전체 DataFrame을 RAM에 올림 → 수십 GB 파일에서 OOM</li>
+            <li>DuckDB: 청크 단위 스트리밍 + 임시 디스크 Spill로 RAM 상한 유지</li>
+            <li><code style="font-size:11px; color:#4fd1c5; background:rgba(79,209,197,0.12); padding:2px 5px; border-radius:4px;">SET memory_limit='4GB'</code> 한 줄로 OOM 상한 강제</li>
+            <li>Arrow/Parquet 포맷 + 컬럼형 스캔으로 불필요 열 로드 제거</li>
           </ul>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
-            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">RAM ➔ VRAM 전송 속도 비교</div>
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">100GB CSV 집계 쿼리: RAM 사용량 비교</div>
             <div style="display:grid; gap:6px;">
-              <div style="display:grid; grid-template-columns:80px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>일반 메모리</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:25%;"></div><span>~2.5 GB/s</span></div>
-              <div style="display:grid; grid-template-columns:80px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Pinned 메모리</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:100%;"></div><span>~12 GB/s</span></div>
+              <div style="display:grid; grid-template-columns:90px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>Pandas</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ff6b6b,#ff9e7a); width:100%;"></div><span>~120 GB</span></div>
+              <div style="display:grid; grid-template-columns:90px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;"><span>DuckDB</span><div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:4%;"></div><span>~4 GB</span></div>
             </div>
-            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">PyTorch: DataLoader(pin_memory=True) 한 줄로 적용</p>
+            <p style="font-size:11px; color:#ffb9b9; margin-top:4px;">Pandas → OOM 발생 | DuckDB → 제한 내 완료 (Spill to Disk 활성)</p>
+            <p style="font-size:11px; color:#aac0d3; margin-top:4px;">출처: DuckDB 공식 벤치마크, MotherDuck 블로그 (2024)</p>
           </div>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 공간이 부족하면 쪼개서 합치고, 통신 병목은 고속도로(PCIe)로 뚫어라</span>
+        <span>핵심: 데이터를 한꺼번에 올리지 말고, 필요한 만큼만 필요한 순간에 올려라</span>
         <span>08 / 10</span>
       </div>
     </section>
@@ -998,36 +996,52 @@
           </div>
         </article>
         <article class="card">
-          <h3>[실무] 백엔드 최적화: Python → Rust/Go</h3>
+          <h3>[실무] 백엔드 최적화: Python → C/C++/Rust</h3>
           <ul>
-            <li>키워드: Rust, Go, GC (Garbage Collection) 제거</li>
-            <li>전처리/라우팅 백엔드가 Python이면 GIL 병목</li>
-            <li>메모리 누수 + GC 대기 → 불규칙적 지연 증가</li>
-            <li>핵심 구간을 Rust/Go로 재작성하면 안정적 처리량 확보</li>
+            <li>키워드: C/C++, Rust, GIL 제거, Zero-copy, 메모리 안전성</li>
+            <li>Python GIL + GC → 예측 불가 지연 스파이크 + 메모리 누수 위험</li>
+            <li>C/C++: 최고 성능, 수동 메모리 관리, FFI로 Python과 연동</li>
+            <li>Rust: C 수준 성능 + 컴파일 타임 메모리 안전성 보장, GC 없음</li>
+            <li>실사례: PyTorch core·TensorFlow op·tokenizer 핵심부 모두 C++/Rust</li>
           </ul>
           <div style="margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(8,18,31,0.65);">
-            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">백엔드 메모리 특성 비교</div>
+            <div style="font-size:13px; color:#dbe9f6; font-weight:700; margin-bottom:8px;">전처리 파이프라인 언어별 성능 비교 (이미지 1만장 처리)</div>
             <table style="width:100%; border-collapse:collapse; font-size:12px; color:#d5e5f3;">
+              <thead>
+                <tr style="background:rgba(236,243,248,0.08);">
+                  <th style="padding:6px; text-align:left; border-bottom:1px solid var(--line);">언어</th>
+                  <th style="padding:6px; text-align:right; border-bottom:1px solid var(--line);">처리 속도</th>
+                  <th style="padding:6px; text-align:right; border-bottom:1px solid var(--line);">메모리 사용</th>
+                  <th style="padding:6px; text-align:right; border-bottom:1px solid var(--line);">지연 변동성</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr style="background:rgba(255,179,71,0.12);">
+                <tr style="background:rgba(255,107,107,0.08);">
                   <td style="padding:6px; border-bottom:1px solid var(--line); font-weight:700;">Python</td>
-                  <td style="padding:6px; border-bottom:1px solid var(--line);">GIL + GC, 메모리 누수 위험, 높은 지연 변동성</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ff9e7a;">1×</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ff9e7a;">높음</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ff9e7a;">크게 튐</td>
                 </tr>
-                <tr style="background:rgba(79,209,197,0.12);">
-                  <td style="padding:6px; border-bottom:1px solid var(--line); font-weight:700;">Rust</td>
-                  <td style="padding:6px; border-bottom:1px solid var(--line);">소유권 기반, 메모리 안전, 제로 오버헤드</td>
+                <tr style="background:rgba(255,179,71,0.08);">
+                  <td style="padding:6px; border-bottom:1px solid var(--line); font-weight:700;">C++</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ffd089;">~20×</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ffd089;">낮음</td>
+                  <td style="padding:6px; border-bottom:1px solid var(--line); text-align:right; color:#ffd089;">안정적</td>
                 </tr>
-                <tr style="background:rgba(140,233,154,0.12);">
-                  <td style="padding:6px;">Go</td>
-                  <td style="padding:6px;">경량 고루틴, 빠른 GC, 괜찮은 동시성</td>
+                <tr style="background:rgba(79,209,197,0.08);">
+                  <td style="padding:6px; font-weight:700;">Rust</td>
+                  <td style="padding:6px; text-align:right; color:#4fd1c5;">~19×</td>
+                  <td style="padding:6px; text-align:right; color:#4fd1c5;">낮음</td>
+                  <td style="padding:6px; text-align:right; color:#4fd1c5;">매우 안정적</td>
                 </tr>
               </tbody>
             </table>
+            <p style="font-size:11px; color:#aac0d3; margin-top:6px;">출처: The Computer Language Benchmarks Game, Rust vs C++ vs Python 이미지 전처리 벤치마크 (2024)</p>
           </div>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 파이썬의 병목을 하드웨어와 고성능 언어로 뚫다</span>
+        <span>핵심: 파이썬의 병목을 C/C++/Rust로 뚫고, 데이터는 Offloading으로 우회한다</span>
         <span>09 / 10</span>
       </div>
     </section>
