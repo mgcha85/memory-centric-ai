@@ -544,7 +544,7 @@
       </div>
       <div class="footer">
         <span>발표자: [이름/직책]</span>
-        <span>01 / 10</span>
+        <span>01 / 09</span>
       </div>
     </section>
 
@@ -587,7 +587,7 @@
       </div>
       <div class="footer">
         <span>핵심: AI의 다음 병목은 연산이 아니라 메모리 이동과 메모리 비용</span>
-        <span>02 / 10</span>
+        <span>02 / 09</span>
       </div>
     </section>
 
@@ -620,7 +620,7 @@
       </div>
       <div class="footer">
         <span>핵심: 용량은 아래로 갈수록 커지고, 속도와 bit당 비용은 반대로 움직인다</span>
-        <span>03 / 10</span>
+        <span>03 / 09</span>
       </div>
     </section>
 
@@ -665,34 +665,12 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: Preload 중심에서 On-demand 중심으로 메모리 철학이 전환</span>
-        <span>04 / 10</span>
-      </div>
-    </section>
-
-    <section class="slide" data-title="Transition Pytorch">
-      <div class="eyebrow"><span class="dot"></span>Slide 5 · 전환기</div>
-      <div class="grid-2">
-        <article class="card">
-          <h3>빅데이터 진입과 PyTorch의 승리</h3>
-          <ul>
-            <li>키워드: Lazy Evaluation, Dynamic Graph</li>
-            <li>데이터가 메모리를 초과하는 순간 기존 철학 붕괴</li>
-            <li>필요한 만큼만 할당/해제하는 동적 메모리 제어</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>핵심 포인트</h3>
-          <p>Python 제너레이터, Go/Rust 스트림 처리처럼 온디맨드 접근이 실무 표준이 된 흐름을 연결한다. PyTorch의 유연성이 실무 생산성과 디버깅 역량을 끌어올린 지점을 강조한다.</p>
-        </article>
-      </div>
-      <div class="footer">
-        <span>핵심: 필요한 순간에 필요한 데이터만</span>
-        <span>05 / 10</span>
+        <span>04 / 09</span>
       </div>
     </section>
 
     <section class="slide" data-title="LLM KV Cache">
-      <div class="eyebrow"><span class="dot"></span>Slide 6 · LLM 시대 위기</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 5 · LLM 시대 위기</div>
       <div class="grid-2">
         <article class="card">
           <h3>[LLM 시대] 새로운 위기, KV Cache 병목</h3>
@@ -765,12 +743,12 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: LLM 서빙 성능의 승부처는 KV Cache 관리와 파편화 제어</span>
-        <span>06 / 10</span>
+        <span>05 / 09</span>
       </div>
     </section>
 
     <section class="slide" data-title="vLLM Paging">
-      <div class="eyebrow"><span class="dot"></span>Slide 7 · 돌파구 1</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 6 · 돌파구 1</div>
       <div class="grid-2">
         <article class="card">
           <h3>OS의 지혜: vLLM & PagedAttention</h3>
@@ -787,12 +765,12 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: 메모리 파편화를 4% 미만 수준으로 억제</span>
-        <span>07 / 10</span>
+        <span>06 / 09</span>
       </div>
     </section>
 
     <section class="slide" data-title="Flash Quant">
-      <div class="eyebrow"><span class="dot"></span>Slide 8 · 돌파구 2</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 7 · 돌파구 2</div>
       <div class="grid-2">
         <article class="card">
           <h3>FlashAttention + Quantization</h3>
@@ -809,12 +787,12 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: IO-aware 알고리즘과 모델 압축의 결합</span>
-        <span>08 / 10</span>
+        <span>07 / 09</span>
       </div>
     </section>
 
     <section class="slide" data-title="Context On Demand">
-      <div class="eyebrow"><span class="dot"></span>Slide 9 · 차세대 메타</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 8 · 차세대 메타</div>
       <div class="grid-2">
         <article class="card">
           <h3>"외우지 말고 찾아라"</h3>
@@ -831,12 +809,12 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: 지식은 외부화하고 컨텍스트만 지연 로딩</span>
-        <span>09 / 10</span>
+        <span>08 / 09</span>
       </div>
     </section>
 
     <section class="slide" data-title="Conclusion">
-      <div class="eyebrow"><span class="dot"></span>Slide 10 · 결론</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 9 · 결론</div>
       <div>
         <h2>메모리를 지배하는 자가 AI 시스템을 지배한다</h2>
         <ul>
@@ -847,7 +825,7 @@ session = tf.compat.v1.Session(config=config)
       </div>
       <div class="footer">
         <span>핵심: 메모리 병목을 줄이는 설계가 실무 성능을 결정한다</span>
-        <span>10 / 10</span>
+        <span>09 / 09</span>
       </div>
     </section>
   </main>
