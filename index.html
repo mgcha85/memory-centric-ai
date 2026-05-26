@@ -196,6 +196,85 @@
       animation: fadeInUp 760ms ease both;
     }
 
+    .memory-viz {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 160px 1fr 160px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .axis {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(10, 21, 35, 0.58);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 330px;
+      font-size: clamp(13px, 1.05vw, 16px);
+      color: #c9d8e6;
+    }
+
+    .axis strong {
+      color: #f8fcff;
+      font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+      font-size: clamp(15px, 1.2vw, 18px);
+    }
+
+    .axis-top {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .axis-bottom {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .pyramid {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px 14px;
+      background: rgba(8, 20, 32, 0.72);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 330px;
+    }
+
+    .layer {
+      border-radius: 9px;
+      border: 1px solid rgba(236, 243, 248, 0.28);
+      color: #f7fbff;
+      text-align: center;
+      padding: 7px 8px;
+      font-size: clamp(13px, 1.15vw, 18px);
+      line-height: 1.25;
+      font-weight: 700;
+      width: var(--w);
+      background: linear-gradient(90deg, rgba(79, 209, 197, 0.28), rgba(255, 179, 71, 0.26));
+      animation: fadeInUp 660ms ease both;
+    }
+
+    .layer small {
+      display: block;
+      margin-top: 3px;
+      color: #d2e0ec;
+      font-weight: 500;
+      font-size: clamp(11px, 0.92vw, 14px);
+    }
+
+    .slide3-note {
+      margin-top: 10px;
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: #d9e5ef;
+    }
+
     .timeline {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -285,6 +364,19 @@
         grid-template-columns: 1fr;
       }
 
+      .memory-viz {
+        grid-template-columns: 1fr;
+      }
+
+      .axis {
+        min-height: auto;
+        gap: 8px;
+      }
+
+      .pyramid {
+        min-height: auto;
+      }
+
       .timeline {
         grid-template-columns: 1fr;
       }
@@ -346,12 +438,28 @@
       <div class="eyebrow"><span class="dot"></span>Slide 3 · 메모리 계층</div>
       <div>
         <h2>7단계 확장형 AI 메모리 계층 구조</h2>
-        <div class="timeline">
-          <article class="phase"><strong>1-2</strong><p>L1/L2 Cache, L3 Cache</p></article>
-          <article class="phase"><strong>3-4</strong><p>VRAM(HBM), System RAM</p></article>
-          <article class="phase"><strong>5-7</strong><p>NVMe SSD, HDD, Network/Cloud</p></article>
+        <div class="memory-viz">
+          <aside class="axis" aria-label="속도 축">
+            <strong>속도</strong>
+            <span class="axis-top">상단: 매우 빠름, 지연 매우 낮음</span>
+            <span class="axis-bottom">하단: 느림, 지연 매우 큼</span>
+          </aside>
+          <div class="pyramid" role="img" aria-label="L1 L2에서 네트워크 클라우드로 내려갈수록 용량은 커지고 속도는 낮아지는 메모리 피라미드">
+            <div class="layer" style="--w: 34%;">L1/L2 Cache<small>ns, 최고속, 최고단가</small></div>
+            <div class="layer" style="--w: 42%;">L3 Cache<small>ns, 매우 빠름, 고비용</small></div>
+            <div class="layer" style="--w: 52%;">VRAM (HBM)<small>수백 GB/s+, 고속, 고비용</small></div>
+            <div class="layer" style="--w: 62%;">System RAM<small>수십~수백 GB/s, 중간 비용</small></div>
+            <div class="layer" style="--w: 72%;">NVMe SSD<small>GB/s, 저지연 스토리지</small></div>
+            <div class="layer" style="--w: 82%;">HDD / Object Storage<small>MB/s, 대용량, 저비용</small></div>
+            <div class="layer" style="--w: 92%;">Network & Cloud<small>ms+, 가장 느리지만 사실상 무한 확장</small></div>
+          </div>
+          <aside class="axis" aria-label="비용 축">
+            <strong>비용</strong>
+            <span class="axis-top">상단: bit당 비용 높음</span>
+            <span class="axis-bottom">하단: bit당 비용 낮음</span>
+          </aside>
         </div>
-        <div class="formula">Latency: ns → us → ms</div>
+        <div class="slide3-note">핵심 메시지: 아래 계층으로 갈수록 용량은 증가하지만, 속도는 느려지고 데이터 이동 비용이 커진다.</div>
       </div>
       <div class="footer">
         <span>발표자 노트: 밑바닥 데이터 계층을 어떻게 꼭대기 캐시/VRAM으로 끌어올릴지의 싸움</span>
