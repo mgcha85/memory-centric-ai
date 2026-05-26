@@ -1047,80 +1047,61 @@
     </section>
 
     <section class="slide" data-title="Conclusion">
-      <div class="eyebrow"><span class="dot"></span>Slide 10 · 결론 &amp; 벤치마크</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 10 · 결론 &amp; Q&amp;A</div>
       <div class="grid-2">
-        <article class="card">
-          <h3>실전 벤치마크: 오늘 다룬 기법들의 효과</h3>
-          <div style="margin-bottom:8px; font-size:12px; color:#c8d9e8;">LLM 추론 처리량 (tokens/sec, Llama 2 13B, A100 기준)</div>
-          <div style="display:grid; gap:5px;">
-            <div style="display:grid; grid-template-columns:110px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>Baseline (FP16)</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#778fa8,#9fb6c8); width:20%;"></div>
-              <span>~420</span>
-            </div>
-            <div style="display:grid; grid-template-columns:110px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>+ pin_memory</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:25%;"></div>
-              <span>~500</span>
-            </div>
-            <div style="display:grid; grid-template-columns:110px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>+ INT8 Quant</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:45%;"></div>
-              <span>~960</span>
-            </div>
-            <div style="display:grid; grid-template-columns:110px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>+ vLLM Paging</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ffb347,#ffd089); width:85%;"></div>
-              <span>~1800</span>
-            </div>
-            <div style="display:grid; grid-template-columns:110px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>+ FlashAttn v2</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#8ce99a,#c8f4cf); width:100%;"></div>
-              <span>~2300</span>
-            </div>
+
+        <!-- 왼쪽: SK하이닉스 주가 차트 -->
+        <article class="card" style="display:flex; flex-direction:column; gap:8px;">
+          <h3 style="margin-bottom:4px;">자본 시장이 증명한 기술의 가치</h3>
+          <p style="font-size:12px; color:#c8d9e8; margin:0;">HBM 수요 폭발 → 메모리 병목을 통제하는 자에게 시장이 알파를 부여한다</p>
+          <div style="position:relative; width:100%; background:white; padding:14px 14px 28px 14px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.25); font-family:sans-serif; flex:1;">
+            <div style="text-align:center; color:#333; font-weight:700; font-size:13px; margin-bottom:4px;">SK하이닉스 주가 추이 (2023 ~ 2026)</div>
+            <div style="text-align:center; color:#888; font-size:11px; margin-bottom:8px;">HBM 수요 폭발에 따른 메모리 병목의 경제적 증명</div>
+            <div id="stock-tooltip" style="position:absolute; display:none; background:rgba(0,0,0,0.82); color:white; padding:10px 14px; border-radius:6px; font-size:12px; line-height:1.6; pointer-events:none; z-index:10; box-shadow:0 4px 8px rgba(0,0,0,0.35);"></div>
+            <svg id="hynix-chart" viewBox="0 0 680 260" style="width:100%; height:auto; overflow:visible;"></svg>
           </div>
-          <p style="font-size:11px; color:#9fb4c7; margin-top:6px;">출처: vLLM 논문 (Kwon et al. 2023), FlashAttention-2 논문 (Dao 2023), Meta LLM Inference 벤치마크 재구성</p>
-          <div style="margin-top:10px; font-size:12px; color:#c8d9e8; margin-bottom:6px;">DuckDB vs Pandas: 집계 쿼리 처리 시간 (100GB CSV, 8코어)</div>
-          <div style="display:grid; gap:5px;">
-            <div style="display:grid; grid-template-columns:70px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>Pandas</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#ff6b6b,#ff9e7a); width:100%;"></div>
-              <span>OOM</span>
-            </div>
-            <div style="display:grid; grid-template-columns:70px 1fr auto; gap:6px; align-items:center; font-size:12px; color:#dbe9f5;">
-              <span>DuckDB</span>
-              <div style="height:14px; border-radius:999px; background:linear-gradient(90deg,#4fd1c5,#9ce7df); width:5%;"></div>
-              <span>~18초</span>
-            </div>
-          </div>
-          <p style="font-size:11px; color:#9fb4c7; margin-top:6px;">출처: DuckDB 공식 벤치마크 (duckdb.org/why_duckdb, 2024)</p>
         </article>
-        <article class="card">
-          <h3>메모리를 이해하는 자가,<br/>가장 가볍고 빠른 AI를 만든다</h3>
-          <div style="margin-top:12px; display:grid; gap:10px;">
-            <div style="border:1px solid var(--line); border-radius:10px; padding:10px; background:rgba(8,18,31,0.6);">
-              <div style="font-size:12px; color:#dbe9f6; font-weight:700; margin-bottom:4px;">Demo Repo</div>
-              <p style="font-size:12px; color:#c3d6e6; margin-bottom:4px;">vLLM 서빙 + Rust 전처리 + DuckDB 쿼리 최적화 실전 코드</p>
+
+        <!-- 오른쪽: 핵심 메시지 리뷰 -->
+        <article class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <h2 style="font-size:clamp(18px,2vw,26px); line-height:1.35; margin:0;">
+            메모리를 이해하는 자가,<br/>
+            <span style="color:var(--accent);">가장 가볍고 빠른 AI</span>를 만든다
+          </h2>
+
+          <div style="display:grid; gap:7px; flex:1;">
+            <div style="border-left:3px solid #4fd1c5; padding:8px 10px; background:rgba(79,209,197,0.08); border-radius:0 8px 8px 0;">
+              <div style="font-size:11px; color:#4fd1c5; font-weight:700; margin-bottom:2px;">① 병목의 본질</div>
+              <div style="font-size:12px; color:#d6e5f2;">AI 성능 한계는 <strong>연산(FLOPS)</strong>이 아닌 <strong>메모리 이동(IO)</strong>에 있다</div>
+            </div>
+            <div style="border-left:3px solid #ffb347; padding:8px 10px; background:rgba(255,179,71,0.08); border-radius:0 8px 8px 0;">
+              <div style="font-size:11px; color:#ffb347; font-weight:700; margin-bottom:2px;">② 계층 구조의 힘</div>
+              <div style="font-size:12px; color:#d6e5f2;">VRAM → RAM → SSD → 네트워크, 계층을 이해하면 <strong>병목이 보인다</strong></div>
+            </div>
+            <div style="border-left:3px solid #8ce99a; padding:8px 10px; background:rgba(140,233,154,0.08); border-radius:0 8px 8px 0;">
+              <div style="font-size:11px; color:#8ce99a; font-weight:700; margin-bottom:2px;">③ 코드 한 줄의 파급력</div>
+              <div style="font-size:12px; color:#d6e5f2;"><code style="font-size:11px; color:#4fd1c5;">pin_memory</code> · <code style="font-size:11px; color:#4fd1c5;">mmap</code> · <code style="font-size:11px; color:#4fd1c5;">SET memory_limit</code> — 실무에서 지금 당장 적용 가능</div>
+            </div>
+            <div style="border-left:3px solid #ff6b6b; padding:8px 10px; background:rgba(255,107,107,0.08); border-radius:0 8px 8px 0;">
+              <div style="font-size:11px; color:#ff6b6b; font-weight:700; margin-bottom:2px;">④ 시스템 전체를 조망하라</div>
+              <div style="font-size:12px; color:#d6e5f2;">하드웨어 → 프레임워크 → 백엔드, 엔지니어의 시야가 <strong>시스템의 한계를 결정</strong>한다</div>
+            </div>
+          </div>
+
+          <div style="margin-top:4px; display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+            <div style="border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:rgba(8,18,31,0.6);">
+              <div style="font-size:11px; color:#9fb4c7; margin-bottom:2px;">Demo Repo</div>
               <a href="https://github.com/mgcha85/ai-memory-architecture" target="_blank" rel="noopener" style="color:#9fd7ff; font-size:11px;">github.com/mgcha85/ai-memory-architecture</a>
             </div>
-            <div style="border:1px solid var(--line); border-radius:10px; padding:10px; background:rgba(79,209,197,0.08);">
-              <div style="font-size:12px; color:#dbe9f6; font-weight:700; margin-bottom:6px;">오늘의 핵심 메시지</div>
-              <ul style="font-size:12px; color:#c3d6e6; line-height:1.7; padding-left:16px; margin:0;">
-                <li>AI 성능 한계는 연산이 아닌 <strong>메모리 이동</strong>에 있다</li>
-                <li>계층 구조를 이해하면 병목이 보인다</li>
-                <li>코드 몇 줄(pin_memory, DuckDB, mmap)이 시스템을 바꾼다</li>
-                <li>백엔드-프레임워크-하드웨어, 시스템 전체를 조망하라</li>
-              </ul>
-            </div>
-            <div style="text-align:center; padding:14px; border:1px solid rgba(255,179,71,0.3); border-radius:10px; background:rgba(255,179,71,0.06);">
-              <div style="font-size:20px; color:#ffb347; font-weight:700;">Q &amp; A</div>
-              <div style="font-size:12px; color:#c3d6e6; margin-top:4px;">감사합니다</div>
+            <div style="text-align:center; padding:12px 18px; border:1px solid rgba(255,179,71,0.35); border-radius:8px; background:rgba(255,179,71,0.07);">
+              <div style="font-size:22px; color:#ffb347; font-weight:700; line-height:1;">Q&amp;A</div>
+              <div style="font-size:11px; color:#c3d6e6; margin-top:3px;">감사합니다</div>
             </div>
           </div>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 제약을 이해할 때, 진정한 최적화가 시작된다</span>
+        <span>기술적 제약을 이해하는 아키텍처 최적화, 그것이 시스템을 성공시키는 알파(α)다</span>
         <span>10 / 10</span>
       </div>
     </section>
@@ -1291,6 +1272,76 @@
     }, { passive: true });
 
     goTo(0);
+
+    // SK하이닉스 주가 차트 (Slide 10)
+    (function() {
+      const svg = document.getElementById('hynix-chart');
+      const tooltip = document.getElementById('stock-tooltip');
+      if (!svg || !tooltip) return;
+
+      const labels = ['23.1Q', '23.3Q', '24.1Q', '24.3Q', '25.1Q', '25.3Q', '26.2Q'];
+      const prices  = [85000, 115000, 160000, 210000, 245000, 270000, 310000];
+
+      const w = 680, h = 260, padX = 52, padY = 20;
+      const chartW = w - padX * 2, chartH = h - padY * 2;
+      const minY = 50000, maxY = 350000, rangeY = maxY - minY;
+
+      let svgContent = '';
+
+      // 그리드 + Y축 라벨
+      for (let i = 0; i <= 6; i++) {
+        const val = minY + i * 50000;
+        const y = h - padY - ((val - minY) / rangeY) * chartH;
+        svgContent += `<line x1="${padX}" y1="${y}" x2="${w - padX}" y2="${y}" stroke="#e8e8e8" stroke-width="1"/>`;
+        svgContent += `<text x="${padX - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="#999">${val / 10000}만</text>`;
+      }
+
+      // X축 라벨
+      labels.forEach((lbl, i) => {
+        const x = padX + i * (chartW / (labels.length - 1));
+        svgContent += `<text x="${x}" y="${h - padY + 16}" text-anchor="middle" font-size="10" fill="#777">${lbl}</text>`;
+      });
+
+      // 채우기 경로
+      const ptsArr = prices.map((val, i) => {
+        const x = padX + i * (chartW / (prices.length - 1));
+        const y = h - padY - ((val - minY) / rangeY) * chartH;
+        return [x, y];
+      });
+      const lineD = ptsArr.map((p, i) => (i === 0 ? `M ${p[0]},${p[1]}` : `L ${p[0]},${p[1]}`)).join(' ');
+      const fillD = `${lineD} L ${ptsArr[ptsArr.length - 1][0]},${h - padY} L ${padX},${h - padY} Z`;
+      svgContent += `<path d="${fillD}" fill="rgba(255,77,77,0.13)"/>`;
+      svgContent += `<path d="${lineD}" fill="none" stroke="#ff4d4d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+      svg.innerHTML = svgContent;
+
+      // 인터랙티브 포인트
+      ptsArr.forEach(([x, y], i) => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.innerHTML = `
+          <line class="vl" x1="${x}" y1="${padY}" x2="${x}" y2="${h - padY}" stroke="#555" stroke-dasharray="4" opacity="0" stroke-width="1.5"/>
+          <circle cx="${x}" cy="${y}" r="5" fill="white" stroke="#ff4d4d" stroke-width="2.5"/>
+          <rect x="${x - 28}" y="0" width="56" height="${h}" fill="transparent" style="cursor:crosshair;"/>
+        `;
+        g.addEventListener('mouseenter', () => {
+          g.querySelector('.vl').setAttribute('opacity', '1');
+          tooltip.style.display = 'block';
+          tooltip.innerHTML = `<strong>${labels[i]}</strong><br/>종가(추정): <span style="color:#ffcc00; font-weight:bold;">${prices[i].toLocaleString('ko-KR')} 원</span>`;
+        });
+        g.addEventListener('mousemove', (e) => {
+          const r = svg.parentElement.getBoundingClientRect();
+          let left = e.clientX - r.left + 14;
+          if (left > r.width - 130) left -= 150;
+          tooltip.style.left = left + 'px';
+          tooltip.style.top = (e.clientY - r.top + 14) + 'px';
+        });
+        g.addEventListener('mouseleave', () => {
+          g.querySelector('.vl').setAttribute('opacity', '0');
+          tooltip.style.display = 'none';
+        });
+        svg.appendChild(g);
+      });
+    })();
   </script>
 </body>
 </html>
