@@ -549,63 +549,44 @@
     </section>
 
     <section class="slide" data-title="Intro OOM">
-      <div class="eyebrow"><span class="dot"></span>Slide 2 · 도입</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 2 · AI 하드웨어 메모리 병목 현상</div>
       <div class="grid-2">
         <article class="card">
-          <h3>우리의 진짜 적은 무엇인가?</h3>
-          <ul>
-            <li>텍스트: "우리를 멈추게 하는 것은 연산 부족이 아니다."</li>
-            <li>에러: <span class="danger">RuntimeError: CUDA out of memory.</span></li>
-            <li>GPU TFLOPS vs 메모리 대역폭 성장률 격차</li>
-          </ul>
-          <div class="viz-stack">
-            <div class="bar-chart" role="img" aria-label="V100 A100 H100 세대별 연산 성능과 메모리 대역폭 비교 막대 그래프">
-              <div class="bar-row">
-                <span class="bar-label">V100</span>
-                <div class="bar-track"><div class="bar compute" style="--w: 26%;">15.7 TFLOPS</div></div>
-              </div>
-              <div class="bar-row">
-                <span class="bar-label"></span>
-                <div class="bar-track"><div class="bar bandwidth" style="--w: 30%;">0.9 TB/s</div></div>
-              </div>
-              <div class="bar-row">
-                <span class="bar-label">A100</span>
-                <div class="bar-track"><div class="bar compute" style="--w: 33%;">19.5 TFLOPS</div></div>
-              </div>
-              <div class="bar-row">
-                <span class="bar-label"></span>
-                <div class="bar-track"><div class="bar bandwidth" style="--w: 53%;">1.6 TB/s</div></div>
-              </div>
-              <div class="bar-row">
-                <span class="bar-label">H100</span>
-                <div class="bar-track"><div class="bar compute" style="--w: 100%;">60 TFLOPS</div></div>
-              </div>
-              <div class="bar-row">
-                <span class="bar-label"></span>
-                <div class="bar-track"><div class="bar bandwidth" style="--w: 100%;">3.0 TB/s</div></div>
-              </div>
-            </div>
-            <div class="legend">
-              <span>Compute (FP32 peak)</span>
-              <span>Memory Bandwidth (TB/s)</span>
-            </div>
-            <div class="source-note">공개 자료 재구성: https://en.wikipedia.org/wiki/Ampere_(microarchitecture), https://en.wikipedia.org/wiki/Volta_(microarchitecture), https://en.wikipedia.org/wiki/Hopper_(microarchitecture), https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf</div>
+          <h3>AI 하드웨어 메모리 병목 현상 (Memory Wall)</h3>
+          <p style="font-size: clamp(14px, 1.1vw, 17px); color: #dce8f3; margin-bottom: 10px;">연산 장치(GPU 코어)의 발전 속도를 메모리 대역폭이 따라가지 못하면, 코어는 대기하고 시스템 전체 처리량이 제한된다.</p>
+          <div style="position: relative; width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 20px 20px 40px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: sans-serif;">
+            <h3 style="text-align: center; color: #333; margin-bottom: 20px; font-size: 20px;">연산력 vs 메모리 대역폭 성장 격차 (2014년 대비)</h3>
+
+            <div id="chart-tooltip" style="position: absolute; display: none; background: rgba(0,0,0,0.8); color: white; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; pointer-events: none; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+
+            <svg id="vanilla-chart" viewBox="0 0 800 400" style="width: 100%; height: auto; overflow: visible;"></svg>
           </div>
+          <p style="font-size: 12px; color: #9db3c7; margin-top: 8px;">출처 재구성: NVIDIA K80/P100/V100/A100/H100/B100 공개 스펙 및 공개 기사 자료 기반</p>
         </article>
         <article class="card">
-          <h3>폰 노이만 병목 시각화</h3>
-          <div class="bottleneck-diagram" role="img" aria-label="GPU 코어와 메모리 사이의 공용 버스가 좁아 병목이 생기는 구조">
+          <h3>연쇄 효과: AI → 빅데이터 → 대형 메모리 요구</h3>
+          <div class="bottleneck-diagram" role="img" aria-label="AI가 빅데이터를 요구하고 빅데이터가 큰 메모리를 요구하면서 메모리 병목이 심화되는 연쇄 효과">
             <div class="flow">
-              <div class="node">연산 장치<br/>GPU Core</div>
+              <div class="node">AI 모델 고도화<br/>파라미터 증가</div>
               <div class="bus" aria-hidden="true"></div>
-              <div class="node">메모리 계층<br/>HBM / RAM / SSD</div>
+              <div class="node">빅데이터/긴 컨텍스트<br/>입출력 폭증</div>
             </div>
-            <p class="impact">정의: 명령/데이터가 같은 경로를 공유해 동시에 충분히 공급되지 못할 때, 빠른 코어가 메모리를 기다리며 성능이 제한되는 현상.</p>
+            <div class="flow">
+              <div class="node">대형 메모리 요구<br/>HBM/DRAM 증설</div>
+              <div class="bus" aria-hidden="true"></div>
+              <div class="node">비용/지연/전력 상승<br/>OOM 위험 증가</div>
+            </div>
+            <p class="impact">핵심: AI가 고도화될수록 데이터 이동량이 커지고, 결국 "연산 최적화"보다 "메모리 공급과 이동 최적화"가 성능을 지배한다.</p>
           </div>
+          <ul style="margin-top: 10px;">
+            <li><span class="danger">증상:</span> GPU 코어 유휴, TTFT 증가, 처리량 저하</li>
+            <li><span class="accent">원인:</span> 메모리 대역폭/용량/파편화 한계</li>
+            <li><span class="ok">대응:</span> Paging, Caching, Quantization, IO-aware 알고리즘</li>
+          </ul>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 연산 성능 증가 속도 대비 데이터 이동이 병목</span>
+        <span>핵심: AI의 다음 병목은 연산이 아니라 메모리 이동과 메모리 비용</span>
         <span>02 / 10</span>
       </div>
     </section>
@@ -641,6 +622,8 @@
         <span>핵심: 용량은 아래로 갈수록 커지고, 속도와 bit당 비용은 반대로 움직인다</span>
         <span>03 / 10</span>
       </div>
+    </section>
+
     <section class="slide" data-title="Act1 Past">
       <div class="eyebrow"><span class="dot"></span>Slide 4 · 과거</div>
       <div class="grid-2">
@@ -792,6 +775,106 @@
 
   <nav class="nav" id="nav" aria-label="슬라이드 네비게이션"></nav>
   <div class="hint">← / → 또는 Space 키로 이동</div>
+
+  <script>
+    (function() {
+      const svg = document.getElementById('vanilla-chart');
+      const tooltip = document.getElementById('chart-tooltip');
+      if (!svg || !tooltip) return;
+
+      const labels = ['2014 (K80)', '2016 (P100)', '2017 (V100)', '2020 (A100)', '2022 (H100)', '2024 (B100)'];
+      const compute = [1, 2.6, 15.6, 39, 247, 500];
+      const bandwidth = [1, 1.5, 1.9, 3.2, 7, 16];
+
+      const w = 800;
+      const h = 400;
+      const padX = 60;
+      const padY = 30;
+      const chartW = w - padX * 2;
+      const chartH = h - padY * 2;
+      const maxY = 500;
+
+      let svgContent = '';
+
+      for (let i = 0; i <= 5; i++) {
+        const y = h - padY - (i * chartH / 5);
+        const val = i * 100;
+        svgContent += `<line x1="${padX}" y1="${y}" x2="${w - padX}" y2="${y}" stroke="#f0f0f0" stroke-width="1" />`;
+        svgContent += `<text x="${padX - 10}" y="${y + 5}" text-anchor="end" font-size="12" fill="#888">${val}x</text>`;
+      }
+
+      labels.forEach((lbl, i) => {
+        const x = padX + i * (chartW / (labels.length - 1));
+        svgContent += `<text x="${x}" y="${h - padY + 25}" text-anchor="middle" font-size="12" fill="#666">${lbl}</text>`;
+      });
+
+      function getPath(data, color, fill) {
+        const pts = data.map((val, i) => {
+          const x = padX + i * (chartW / (data.length - 1));
+          const y = h - padY - (val / maxY) * chartH;
+          return `${x},${y}`;
+        }).join(' L ');
+        const fillPath = `M ${padX},${h - padY} L ${pts} L ${w - padX},${h - padY} Z`;
+        svgContent += `<path d="${fillPath}" fill="${fill}" />`;
+        svgContent += `<path d="M ${pts}" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+      }
+
+      getPath(bandwidth, '#4da6ff', 'rgba(77, 166, 255, 0.15)');
+      getPath(compute, '#ff4d4d', 'rgba(255, 77, 77, 0.1)');
+
+      svgContent += `
+        <rect x="${padX + 20}" y="10" width="12" height="12" fill="#ff4d4d" rx="2"></rect>
+        <text x="${padX + 40}" y="21" font-size="13" fill="#333" font-weight="bold">연산 능력 (TFLOPS)</text>
+        <rect x="${padX + 20}" y="35" width="12" height="12" fill="#4da6ff" rx="2"></rect>
+        <text x="${padX + 40}" y="46" font-size="13" fill="#333" font-weight="bold">메모리 대역폭 (GB/s)</text>
+      `;
+
+      svg.innerHTML = svgContent;
+
+      labels.forEach((lbl, i) => {
+        const x = padX + i * (chartW / (labels.length - 1));
+        const yC = h - padY - (compute[i] / maxY) * chartH;
+        const yB = h - padY - (bandwidth[i] / maxY) * chartH;
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.innerHTML = `
+          <line x1="${x}" y1="${padY}" x2="${x}" y2="${h - padY}" stroke="#555" stroke-dasharray="4" opacity="0" class="hover-line" stroke-width="1.5" />
+          <circle cx="${x}" cy="${yC}" r="6" fill="white" stroke="#ff4d4d" stroke-width="3" />
+          <circle cx="${x}" cy="${yB}" r="6" fill="white" stroke="#4da6ff" stroke-width="3" />
+          <rect x="${x - 30}" y="0" width="60" height="${h}" fill="transparent" style="cursor:crosshair;" />
+        `;
+
+        group.addEventListener('mouseenter', () => {
+          group.querySelector('.hover-line').setAttribute('opacity', '1');
+          tooltip.style.display = 'block';
+          const gap = (compute[i] / bandwidth[i]).toFixed(1);
+          tooltip.innerHTML = `
+            <div style="font-size:15px; margin-bottom:8px; border-bottom:1px solid #555; padding-bottom:4px;"><strong>${lbl}</strong></div>
+            연산력: <span style="color:#ff8080; font-weight:bold;">${compute[i]}x</span><br/>
+            대역폭: <span style="color:#80c1ff; font-weight:bold;">${bandwidth[i]}x</span><br/>
+            <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #555; color:#ffcc00;">
+              병목 격차: <strong>${gap}배</strong>
+            </div>
+          `;
+        });
+
+        group.addEventListener('mousemove', (e) => {
+          const containerRect = svg.parentElement.getBoundingClientRect();
+          let leftPos = e.clientX - containerRect.left + 20;
+          if (leftPos > containerRect.width - 160) leftPos -= 180;
+          tooltip.style.left = leftPos + 'px';
+          tooltip.style.top = (e.clientY - containerRect.top + 20) + 'px';
+        });
+
+        group.addEventListener('mouseleave', () => {
+          group.querySelector('.hover-line').setAttribute('opacity', '0');
+          tooltip.style.display = 'none';
+        });
+
+        svg.appendChild(group);
+      });
+    })();
+  </script>
 
   <script>
     const slides = Array.from(document.querySelectorAll('.slide'));
