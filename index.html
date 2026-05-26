@@ -625,23 +625,23 @@
     </section>
 
     <section class="slide" data-title="Act1 Past">
-      <div class="eyebrow"><span class="dot"></span>Slide 4 · 과거</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 4 · AI 최적화의 지상 과제</div>
       <div class="grid-2">
         <article class="card">
-          <h3>공간과 시간의 트레이드오프</h3>
+          <h3>밑바닥 데이터를 VRAM으로, 지연 없이</h3>
           <ul>
-            <li>키워드: Eager Loading, Look-Up Table, TensorFlow 1.x</li>
-            <li>철학: "연산(시간)은 비싸고, 메모리(공간)는 싸다."</li>
-            <li>정적 그래프 기반 선점 할당으로 처리량 확보</li>
+            <li>실제 거대 데이터는 5단계 SSD, 6단계 HDD, 7단계 외부 네트워크에 존재</li>
+            <li>3단계 VRAM과 7단계 네트워크 사이 지연 차이는 100만 배 이상</li>
+            <li>무작정 끌어올리면 좁은 VRAM 작업장이 포화되어 OOM 발생</li>
           </ul>
         </article>
         <article class="card">
           <h3>핵심 포인트</h3>
-          <p>데이터 규모가 통제 가능했던 시절에는 미리 계산하고 메모리에 올려두는 전략이 합리적이었다는 맥락을 설명한다. TensorFlow 1.x의 초기 VRAM 점유도 같은 철학의 산물이다.</p>
+          <p>AI 시스템 최적화의 본질은 단순하다. 아래에서 위로 데이터를 올리는 횟수를 최소화하고, 정말 필요한 순간에만 핀셋처럼 선택적으로 로딩하는 아키텍처를 설계하는 것이다.</p>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 메모리 선점으로 런타임 연산 최소화</span>
+        <span>핵심: 전체 데이터를 올리는 시대에서, 필요한 데이터만 올리는 시대로</span>
         <span>04 / 10</span>
       </div>
     </section>
