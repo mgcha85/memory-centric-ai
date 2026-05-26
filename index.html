@@ -616,7 +616,7 @@
             <span class="axis-bottom">하단: bit당 비용 낮음</span>
           </aside>
         </div>
-        <div class="slide3-note">핵심 메시지: 아래 계층으로 갈수록 용량은 증가하지만, 속도는 느려지고 데이터 이동 비용이 커진다.</div>
+        <div class="slide3-note">가중치 파일, 수백만 건 문서 DB, 제조 데이터, 이미지 같은 거대 데이터는 SSD/HDD/외부 네트워크에 존재한다. 가장 큰 문제는 속도다. VRAM과 네트워크 사이에는 100만 배 이상 지연 차이가 나며, 무거운 데이터를 VRAM으로 무작정 올리면 OOM이 발생한다. 결국 최적화는 데이터 상향 이동 횟수를 줄이고, 필요한 순간에만 선택적으로 로딩하는 아키텍처를 설계하는 일이다.</div>
       </div>
       <div class="footer">
         <span>핵심: 용량은 아래로 갈수록 커지고, 속도와 bit당 비용은 반대로 움직인다</span>
@@ -625,23 +625,31 @@
     </section>
 
     <section class="slide" data-title="Act1 Past">
-      <div class="eyebrow"><span class="dot"></span>Slide 4 · AI 최적화의 지상 과제</div>
+      <div class="eyebrow"><span class="dot"></span>Slide 4 · 과거</div>
       <div class="grid-2">
         <article class="card">
-          <h3>밑바닥 데이터를 VRAM으로, 지연 없이</h3>
+          <h3>공간과 시간의 트레이드오프</h3>
           <ul>
-            <li>실제 거대 데이터는 5단계 SSD, 6단계 HDD, 7단계 외부 네트워크에 존재</li>
-            <li>3단계 VRAM과 7단계 네트워크 사이 지연 차이는 100만 배 이상</li>
-            <li>무작정 끌어올리면 좁은 VRAM 작업장이 포화되어 OOM 발생</li>
+            <li>키워드: Eager Loading, Look-Up Table, TensorFlow 1.x</li>
+            <li>연산(시간)은 비싸고, 메모리(공간)는 싸다.</li>
+            <li>정적 그래프로 GPU 메모리를 시작부터 크게 점유</li>
           </ul>
+          <pre style="margin-top:10px; padding:10px; border-radius:10px; background: rgba(4, 10, 18, 0.85); color:#d9e8f6; border:1px solid var(--line); overflow:auto; font-size:12px; line-height:1.4;"><code>import tensorflow as tf
+
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.allow_growth = False
+session = tf.compat.v1.Session(config=config)
+
+# Define-and-Run 기반 정적 그래프
+# 세션 시작 시 VRAM을 크게 선점할 수 있음</code></pre>
         </article>
         <article class="card">
           <h3>핵심 포인트</h3>
-          <p>AI 시스템 최적화의 본질은 단순하다. 아래에서 위로 데이터를 올리는 횟수를 최소화하고, 정말 필요한 순간에만 핀셋처럼 선택적으로 로딩하는 아키텍처를 설계하는 것이다.</p>
+          <p>데이터 크기가 통제 가능했던 시절에는 속도를 위해 메모리에 필요한 것을 미리 올려두는 방식이 표준이었다. 과거 프레임워크는 실행 안정성과 처리량을 위해 정적 메모리 선점 전략을 적극 사용했다.</p>
         </article>
       </div>
       <div class="footer">
-        <span>핵심: 전체 데이터를 올리는 시대에서, 필요한 데이터만 올리는 시대로</span>
+        <span>핵심: 과거의 정답은 메모리 선점으로 연산 시간을 줄이는 것이었다</span>
         <span>04 / 10</span>
       </div>
     </section>
